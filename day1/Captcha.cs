@@ -55,11 +55,12 @@ class Program
     }
 
     static int SecondHalf(int[] numbers){
-        return 0;
+        return numbers.Where((t, i) => t == numbers[(i + numbers.Length/2) % numbers.Length]).Sum();
     }
     
     static void Main(string[] args)
     {
         Console.WriteLine($"FirstHalf: {FirstHalf(input)}");
+        Console.WriteLine($"SecondHalf: {SecondHalf(input)}");
     }
 }
