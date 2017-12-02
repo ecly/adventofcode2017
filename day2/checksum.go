@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+type rowFunc func([]int) int
+
 const inf = 1 << 30
 
 // Calculate largest difference between ints in array
@@ -26,7 +28,7 @@ func maxDiff(row []int) int {
 	return max - min
 }
 
-func readAndSolve(reader io.Reader) int {
+func readAndSolve(reader io.Reader, rf rowFunc) int {
 	sum := 0
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
@@ -35,11 +37,11 @@ func readAndSolve(reader io.Reader) int {
 		for i := 0; i < len(fields); i++ {
 			row[i], _ = strconv.Atoi(fields[i])
 		}
-		sum += maxDiff(row)
+		sum += rf(row)
 	}
 	return sum
 }
 
 func main() {
-	fmt.Println(readAndSolve(os.Stdin))
+	fmt.Println(readAndSolve(os.Stdin, maxDiff))
 }
