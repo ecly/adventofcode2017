@@ -28,6 +28,24 @@ func maxDiff(row []int) int {
 	return max - min
 }
 
+// Calculate the result of dividing the first two evenly divisible numbers in the row
+func firstEvenlyDivisible(row []int) int {
+	for i := 0; i < len(row); i++ {
+		vali := row[i]
+		for j := i + 1; j < len(row); j++ {
+			high := row[j]
+			low := vali
+			if high < low {
+				high, low = low, high
+			}
+			if high%low == 0 {
+				return high / low
+			}
+		}
+	}
+	return -1
+}
+
 func readAndSolve(reader io.Reader, rf rowFunc) int {
 	sum := 0
 	scanner := bufio.NewScanner(reader)
@@ -43,5 +61,6 @@ func readAndSolve(reader io.Reader, rf rowFunc) int {
 }
 
 func main() {
-	fmt.Println(readAndSolve(os.Stdin, maxDiff))
+	//fmt.Println("first half: ", readAndSolve(os.Stdin, maxDiff))
+	fmt.Println("second half: ", readAndSolve(os.Stdin, firstEvenlyDivisible))
 }
