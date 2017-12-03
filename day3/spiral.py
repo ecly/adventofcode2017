@@ -3,6 +3,8 @@ import math
 
 def spiral(target):
     """
+    First half of day 3 of adventofcode 2017.
+
     Calculate Manhatten distance from a spiral starting at one
     to the target value 'target'.
 
