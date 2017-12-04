@@ -1,16 +1,26 @@
+import Data.List
+
 main :: IO()
 main = do 
     input <- getContents 
     let phrases = lines input
-    putStrLn $ show $ amountOfValid phrases 0
+    putStrLn $ show $ amountOfValid hasNoDuplicates phrases 0
+    putStrLn $ show $ amountOfValid hasNoAnagrams phrases 0
 
-amountOfValid :: [String] -> Int -> Int
-amountOfValid [] count = count
-amountOfValid (x:xs) count = 
-    if isValidPassphrase $ words x
-       then amountOfValid xs count+1
-       else amountOfValid xs count
+amountOfValid :: ([String] -> Bool) -> [String] -> Int -> Int
+amountOfValid _ [] count = count
+amountOfValid isValid (x:xs) count = 
+    if isValid $ words x
+       then amountOfValid isValid xs count+1
+       else amountOfValid isValid xs count
     
-isValidPassphrase :: [String] -> Bool 
-isValidPassphrase [] = True
-isValidPassphrase (x:xs) = x `notElem` xs && isValidPassphrase xs
+hasNoDuplicates :: [String] -> Bool 
+hasNoDuplicates [] = True
+hasNoDuplicates (x:xs) = x `notElem` xs && hasNoDuplicates xs
+
+hasNoAnagrams :: [String] -> Bool 
+hasNoAnagrams [] = True
+hasNoAnagrams (x:xs) = (not $ any (isAnagram x) xs) && hasNoAnagrams xs
+
+isAnagram :: String -> String -> Bool
+isAnagram a b = sort a == sort b
