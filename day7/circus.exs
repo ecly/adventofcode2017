@@ -1,3 +1,7 @@
+defmodule Program do
+  defstruct key: nil, weight: 0, children: [], disc_weight: 0
+end
+
 defmodule Circus do
   @parent ~r/(\w+) \((\d+)\) -> ([\w+,?\s?]+)/
   @child ~r/(\w+) \((\d+)\)/
@@ -5,18 +9,18 @@ defmodule Circus do
   def parseChildren(children) do
     children
     |> String.split(",")
-    |> Enum.map(fn s -> String.trim(s) end)
+    |> Enum.map(&String.trim/1)
   end
 
   def parseParent(line) do
-    [[_, parent, weight, childString]] = Regex.scan(@parent, line)
+    [[_, key, weight, childString]] = Regex.scan(@parent, line)
     children = parseChildren(childString)
-    {parent, {weight, children}}
+    %Program{key: key, weight: String.to_integer(weight), children: children}
   end
 
   def parseChild(line) do
-    [[_, child, weight]] = Regex.scan(@child, line)
-    {child, {weight, []}}
+    [[_, key, weight]] = Regex.scan(@child, line)
+    %Program{key: key, weight: String.to_integer(weight)}
   end
 
   def parse(graph \\ %{}, file) do
@@ -24,27 +28,44 @@ defmodule Circus do
     cond do
       line == :eof -> graph
       Regex.match?(@parent, line) -> 
-        {parent, value} = parseParent(line)
-        Map.put(graph, parent, value)
+        parent = parseParent(line)
+        Map.put(graph, parent.key, parent)
         |> parse(file)
       Regex.match?(@child, line) -> 
-        {child, value} = parseChild(line)
-        Map.put(graph, child, value)
+        child = parseChild(line)
+        Map.put(graph, child.key, child)
         |> parse(file)
       true -> graph
     end
   end
 
-  def solve(filename) do
+  def get_root(graph) do
+    parents = Enum.filter(graph, fn {_,v} -> !Enum.empty?(v.children) end)
+              |> Enum.map(fn {k, _} -> k end)
+    children = Enum.flat_map(graph, fn {_,v} -> v.children end)
+    hd(parents -- children)
+  end
+
+  def is_same?([x|xss]) do
+    x == hd(xss) && is_same?(xss)
+  end
+
+  def solve_first(filename) do
     {:ok, file} = File.open(filename, [:read])
-    graph = parse(file)
-    parents = Enum.filter(graph, fn p -> !match?({_,{_,[]}}, p) end)
-    children = Enum.flat_map(graph, fn {_,{_,c}} -> c end)
-    Keyword.keys(parents) -- children
+    parse(file)
+    |> get_root
+  end
+
+  def solve_second(filename) do
+    {:ok, file} = File.open(filename, [:read])
+    parse(file)
   end
 end
 
-Circus.solve("test.in")
-|> IO.inspect
-Circus.solve("input.in")
-|> IO.inspect
+IO.write "first: "
+Circus.solve_first("input.in")
+|> IO.puts
+
+# IO.write"second: "
+# Circus.solve_second("input.in")
+# |> IO.puts
