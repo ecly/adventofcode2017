@@ -11,32 +11,36 @@ defmodule Circus do
   def parseParent(line) do
     [[_, parent, weight, childString]] = Regex.scan(@parent, line)
     children = parseChildren(childString)
-    {parent, children}
+    {parent, {weight, children}}
   end
 
   def parseChild(line) do
     [[_, child, weight]] = Regex.scan(@child, line)
-    child
+    {child, {weight, []}}
   end
 
-  def parse(file, parents \\ [], children \\ []) do
+  def parse(graph \\ %{}, file) do
     line = file |> IO.read(:line)
     cond do
-      line == :eof -> {parents, children}
+      line == :eof -> graph
       Regex.match?(@parent, line) -> 
-        {parent, newChildren} = parseParent line
-        parse(file, [parent|parents], newChildren ++ children)
+        {parent, value} = parseParent(line)
+        Map.put(graph, parent, value)
+        |> parse(file)
       Regex.match?(@child, line) -> 
-        child = parseChild line
-        parse(file, parents, [child|children])
-      true -> {parents, children}
+        {child, value} = parseChild(line)
+        Map.put(graph, child, value)
+        |> parse(file)
+      true -> graph
     end
   end
 
   def solve(filename) do
     {:ok, file} = File.open(filename, [:read])
-    {parents, children} = parse(file)
-    parents -- children
+    graph = parse(file)
+    parents = Enum.filter(graph, fn p -> !match?({_,{_,[]}}, p) end)
+    children = Enum.flat_map(graph, fn {_,{_,c}} -> c end)
+    Keyword.keys(parents) -- children
   end
 end
 
