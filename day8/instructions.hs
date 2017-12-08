@@ -1,4 +1,3 @@
-import Data.List
 import Data.Map (Map)
 import qualified Data.Map as Map
 
@@ -15,10 +14,10 @@ data Instruction = Instruction { key :: Key
 main :: IO()
 main = do 
     input <- getContents 
-    let instructions = lines input
-    let registers = Map.fromList $ zip (map (head . words) instructions) (repeat 0)
-    putStrLn $ show $ map parse instructions
-        -- putStrLn $ show $ maximum $ (Map.mapKeys . apply) registers
+    let instrLines = lines input
+    let registers = Map.fromList $ zip (map (head . words) instrLines) (repeat 0)
+    let instructions = map parse instrLines
+    putStrLn $ show $ maximum $ Map.elems $ apply registers instructions
 
 parseUnary :: String -> Unary
 parseUnary "dec" = Dec
@@ -42,6 +41,24 @@ parse s = let parsed = words s
               pv = read $ parsed!!6
           in Instruction k u v pk o pv
 
-apply :: Map k a -> [Instruction] -> Map k a
+predicate :: Map Key Integer -> Instruction -> Bool
+predicate m i =
+    let actualVal = Map.findWithDefault 0 (predicateKey i) m
+    in case operator i of
+         Eq -> actualVal == (predicateVal i)
+         Ne -> actualVal /= (predicateVal i)
+         Gt -> actualVal >  (predicateVal i)
+         Lt -> actualVal <  (predicateVal i)
+         Ge -> actualVal >= (predicateVal i)
+         Le -> actualVal <= (predicateVal i)
+
+updateFunc :: Instruction -> Integer -> Integer
+updateFunc i = case unary i of
+                 Inc -> (+) $ unaryVal i
+                 Dec -> (+) $ -1 * unaryVal i
+
+apply :: Map Key Integer -> [Instruction] -> Map Key Integer
 apply m [] = m
-apply m (x:xs) = m
+apply m (x:xs) 
+  | predicate m x = apply (Map.adjust (updateFunc x) (key x) m) xs
+  | otherwise     = apply m xs
