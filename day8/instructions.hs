@@ -1,4 +1,4 @@
-import Data.Map (Map)
+import Data.Map (Map) 
 import qualified Data.Map as Map
 
 type Key = String
@@ -17,7 +17,9 @@ main = do
     let instrLines = lines input
     let registers = Map.fromList $ zip (map (head . words) instrLines) (repeat 0)
     let instructions = map parse instrLines
-    putStrLn $ show $ maximum $ Map.elems $ apply registers instructions
+    let (newRegisters, maxVal) = apply registers instructions 0
+    putStrLn $ "first: " ++ (show $ maximum $ Map.elems $ newRegisters)
+    putStrLn $ "second: " ++ (show $ maxVal)
 
 parseUnary :: String -> Unary
 parseUnary "dec" = Dec
@@ -57,8 +59,13 @@ updateFunc i = case unary i of
                  Inc -> (+) $ unaryVal i
                  Dec -> (+) $ -1 * unaryVal i
 
-apply :: Map Key Integer -> [Instruction] -> Map Key Integer
-apply m [] = m
-apply m (x:xs) 
-  | predicate m x = apply (Map.adjust (updateFunc x) (key x) m) xs
-  | otherwise     = apply m xs
+apply :: Map Key Integer -> [Instruction] -> Integer -> (Map Key Integer, Integer)
+apply m [] maxSeen = (m, maxSeen)
+apply m (x:xs) maxSeen
+  | predicate m x = let k = key x
+                        currentVal = Map.findWithDefault 0 k m
+                        newVal = updateFunc x currentVal 
+                        newMax = max maxSeen $ max currentVal newVal
+                    in 
+                    apply (Map.insert k newVal m) xs newMax
+  | otherwise     = apply m xs maxSeen
