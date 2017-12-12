@@ -10,25 +10,24 @@ import (
 	"strings"
 )
 
-// Graph ...
 type Graph = map[int][]int
+type Visited = map[int]bool
 
-func bfsCountReachable(graph Graph, start int) int {
+func bfs(graph Graph, start int, visited Visited) (int, Visited) {
 	queue := []int{start}
-	visisted := make(map[int]bool)
 	count := 0
 	for len(queue) > 0 {
 		head := queue[0]
 		queue = queue[1:]
-		if _, ok := visisted[head]; !ok {
-			visisted[head] = true
+		if _, ok := visited[head]; !ok {
+			visited[head] = true
 			count++
 			for _, v := range graph[head] {
 				queue = append(queue, v)
 			}
 		}
 	}
-	return count
+	return count, visited
 }
 
 func readGraph(reader io.Reader) Graph {
@@ -51,5 +50,15 @@ func readGraph(reader io.Reader) Graph {
 
 func main() {
 	graph := readGraph(os.Stdin)
-	fmt.Printf("first half: %v\n", bfsCountReachable(graph, 0))
+	size, visited := bfs(graph, 0, Visited{})
+	fmt.Println(size)
+
+	count := 1
+	for k := range graph {
+		if _, ok := visited[k]; !ok {
+			count++
+			_, visited = bfs(graph, k, visited)
+		}
+	}
+	fmt.Println(count)
 }
