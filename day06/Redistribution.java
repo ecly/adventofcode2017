@@ -44,10 +44,7 @@ public class Redistribution{
 
     public static void main(String[] args){
         Integer[] blocks = new Integer[]{11, 11, 13, 7, 0, 15, 5, 5, 4, 4, 1, 1, 7, 1, 15, 11};
-        Integer[] test = new Integer[]{0,2,7,0};
-        System.out.println("First Test: " + solveFirst(Arrays.asList(test)));
         System.out.println("First Answer: " + solveFirst(Arrays.asList(blocks)));
-        System.out.println("Second Test: " + solveSecond(Arrays.asList(test)));
         System.out.println("Second Answer: " + solveSecond(Arrays.asList(blocks)));
     }
 }

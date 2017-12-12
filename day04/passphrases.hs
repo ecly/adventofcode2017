@@ -4,15 +4,11 @@ main :: IO()
 main = do 
     input <- getContents 
     let phrases = lines input
-    putStrLn $ show $ amountOfValid hasNoDuplicates phrases 0
-    putStrLn $ show $ amountOfValid hasNoAnagrams phrases 0
+    putStrLn $ show $ amountOfValid hasNoDuplicates phrases
+    putStrLn $ show $ amountOfValid hasNoAnagrams phrases
 
-amountOfValid :: ([String] -> Bool) -> [String] -> Int -> Int
-amountOfValid _ [] count = count
-amountOfValid isValid (x:xs) count = 
-    if isValid $ words x
-       then amountOfValid isValid xs count+1
-       else amountOfValid isValid xs count
+amountOfValid :: ([String] -> Bool) -> [String] -> Int
+amountOfValid isValid = length . filter (isValid . words)
     
 hasNoDuplicates :: [String] -> Bool 
 hasNoDuplicates [] = True
