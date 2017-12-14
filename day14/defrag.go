@@ -9,6 +9,11 @@ const size = 256
 const blockSize = 16
 const iterationAmount = 64
 
+// Key ...
+type Key struct {
+	x, y int
+}
+
 var suffix = []int{17, 31, 73, 47, 23}
 
 // Converts the input string to ascii representation
@@ -95,6 +100,7 @@ func generateKnotGrid(input string) [][]bool {
 		bits := fmt.Sprintf("%064b", val1) + fmt.Sprintf("%064b", val2)
 		for j, bit := range bits {
 			if bit == '1' {
+
 				grid[i][j] = true
 			}
 		}
@@ -102,9 +108,40 @@ func generateKnotGrid(input string) [][]bool {
 	return grid
 }
 
+// remove reachable nodes from key in graph and returns the thereby created graph
+func dfs(graph map[Key]bool, key Key) map[Key]bool {
+	x := key.x
+	y := key.y
+	neighbours := []Key{Key{x + 1, y}, Key{x - 1, y}, Key{x, y + 1}, Key{x, y - 1}}
+	for _, k := range neighbours {
+		if _, ok := graph[k]; ok {
+			delete(graph, k)
+			graph = dfs(graph, k)
+		}
+	}
+	return graph
+}
+
+func countRegions(graph [][]bool) int {
+	//convert the grid to a map
+	graphMap := map[Key]bool{}
+	for i, row := range graph {
+		for j, bit := range row {
+			if bit {
+				graphMap[Key{i, j}] = true
+			}
+		}
+	}
+	regions := 0
+	for k := range graphMap {
+		graphMap = dfs(graphMap, k)
+		regions++
+	}
+	return regions
+}
+
 func main() {
 	input := "ffayrhll"
-	//input := "flqrgnkx"
 	grid := generateKnotGrid(input)
 	count := 0
 	for _, row := range grid {
@@ -115,4 +152,5 @@ func main() {
 		}
 	}
 	fmt.Println(count)
+	fmt.Println(countRegions(grid))
 }
