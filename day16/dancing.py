@@ -1,6 +1,8 @@
-def main(file):
-    l = list('abcdefghijklmnop')
-    for m in file.read().split(','):
+import itertools
+
+def dance(moves, positions):
+    l = list(positions)
+    for m in moves:
         if m[0] == 's':
             val = int(m[1:])
             l = l[-val:]+l[:-val]
@@ -14,7 +16,16 @@ def main(file):
             l[x], l[y] = l[y], l[x]
     return ''.join(l)
 
-
 with open('input.in') as f:
-    print(main(f))
-
+    moves = f.read().split(',')
+    initial = 'abcdefghijklmnop'
+    print(dance(moves, initial))
+    seen = [initial]
+    current = initial
+    for i in itertools.count(1): # count from one
+        current = dance(moves, current)
+        if current == initial: # we've gone full circle
+            print(seen[1_000_000_000 % i])
+            break
+        else: 
+            seen.append(current)
