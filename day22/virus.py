@@ -1,29 +1,52 @@
+import copy
+
 CLEAN = 0
 WEAKENED = 1
 INFECTED = 2
 FLAGGED = 3
 
-def main(grid, iterations):
+def first(grid, iterations):
     x, y = 0, 0
     dx, dy = 0, 1
     count = 0
     for _ in range(iterations):
-        node = grid.get((x,y), CLEAN)
         if grid.get((x,y), False):
             dx, dy = dy, -dx # turn right
+            grid[(x, y)] = False
         else:
             dx, dy = -dy, dx # turn left
-
-        if not grid.get((x,y), False):
             grid[(x, y)] = True
             count += 1
-        else: 
-            grid[(x, y)] = False
 
         x += dx
         y += dy
 
     return count
+
+def second(grid, iterations):
+    x, y = 0, 0
+    dx, dy = 0, 1
+    count = 0
+    for _ in range(iterations):
+        node = grid.get((x,y), CLEAN)
+        if node == CLEAN:
+            dx, dy = -dy, dx # turn left
+            grid[(x,y)] = WEAKENED
+        elif node == WEAKENED:
+            grid[(x,y)] = INFECTED
+            count += 1
+        elif node == INFECTED:
+            dx, dy = dy, -dx # turn right
+            grid[(x,y)] = FLAGGED
+        elif node == FLAGGED:
+            dx, dy = -dx, -dy # reverse
+            grid[(x,y)] = CLEAN
+
+        x += dx
+        y += dy
+
+    return count
+
 
 def readGrid(file):
     lines = file.readlines()
@@ -41,4 +64,5 @@ def readGrid(file):
 
 with open('input.in') as f:
     grid = readGrid(f)
-    print(main(grid, 10_000))
+    print(first(copy.deepcopy(grid), 10_000))
+    print(second(grid, 10_000_000))
