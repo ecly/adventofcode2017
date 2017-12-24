@@ -12,4 +12,6 @@ def bridges(pieces, bridge=[], port=0):
 
 with open('input.in') as f:
     pieces = [list(map(int, line.split('/'))) for line in f.readlines()]
-    print(max(map(lambda bridge: sum([sum(part) for part in bridge]), bridges(pieces))))
+    stats = list(map(lambda bridge: (len(bridge), sum([sum(part) for part in bridge])), bridges(pieces)))
+    print(max(stats, key=lambda stat: stat[1])[1])
+    print(max(stats, key=lambda stat: stat[0])[1])
